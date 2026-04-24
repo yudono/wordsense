@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Contexto Indonesia</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ["Space Grotesk", "sans-serif"],
+              body: ["DM Sans", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body>
+    <!-- Blob latar belakang -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Toast container -->
+    <div
+      id="toastBox"
+      class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none"
+    ></div>
+
+    <!-- Konten utama -->
+    <div
+      class="relative z-10 max-w-lg mx-auto px-4 pt-5 pb-28 min-h-screen flex flex-col"
+    >
+      <!-- Header -->
+      <header class="text-center mb-5">
+        <div class="flex items-center justify-center gap-2.5 mb-0.5">
+          <div
+            class="w-8 h-8 rounded-lg flex items-center justify-center"
+            style="background: rgba(245, 158, 11, 0.12)"
+          >
+            <i
+              class="fa-solid fa-magnifying-glass text-sm"
+              style="color: var(--accent)"
+            ></i>
+          </div>
+          <h1
+            class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight"
+          >
+            CONTEXTO
+          </h1>
+        </div>
+        <p style="color: var(--muted)" class="text-sm mt-0.5">
+          Tebak kata tersembunyi berdasarkan konteks
+        </p>
+        <div class="flex items-center justify-center gap-3 mt-2.5">
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
+            style="
+              background: var(--card);
+              border: 1px solid var(--border);
+              color: var(--muted);
+            "
+          >
+            <i
+              class="fa-solid fa-hashtag"
+              style="color: rgba(245, 158, 11, 0.5)"
+            ></i>
+            #<span id="puzzleNum">1</span>
+          </span>
+          <button id="helpBtn" class="icon-btn" aria-label="Bantuan">
+            <i class="fa-solid fa-question"></i>
+          </button>
+          <button id="newGameBtn" class="icon-btn" aria-label="Puzzle baru">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Input -->
+      <div class="flex gap-2 mb-4">
+        <input
+          id="guessInput"
+          type="text"
+          placeholder="Ketik kata apa saja..."
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          class="input-glow flex-1 rounded-xl px-4 py-3 text-sm font-body"
+          style="
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+          "
+        />
+        <button
+          id="guessBtn"
+          class="btn-p rounded-xl px-5 py-3 text-sm font-display tracking-wide"
+        >
+          TEBAK
+        </button>
+      </div>
+
+      <!-- Info bar -->
+      <div class="flex items-center justify-between mb-2.5 px-0.5">
+        <span class="text-xs" style="color: var(--muted)"
+          ><span id="guessCount">0</span> tebakan</span
+        >
+        <div class="flex items-center gap-2">
+          <span id="hintWrap" class="hidden"
+            ><span class="hint-chip" id="hintChip"></span
+          ></span>
+          <button
+            id="shareBtn"
+            class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+            style="
+              background: var(--card);
+              border: 1px solid var(--border);
+              color: var(--muted);
+            "
+          >
+            <i class="fa-solid fa-share-nodes"></i> Share
+          </button>
+        </div>
+      </div>
+
+      <!-- Daftar tebakan -->
+      <div
+        id="guessList"
+        class="flex-1 space-y-1.5 overflow-y-auto pr-0.5"
+        style="max-height: calc(100dvh - 260px)"
+      >
+        <div
+          id="emptyState"
+          class="flex flex-col items-center justify-center py-14 text-center"
+        >
+          <div
+            class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
+            style="background: var(--card); border: 1px solid var(--border)"
+          >
+            <i
+              class="fa-solid fa-lightbulb text-xl"
+              style="color: rgba(101, 101, 111, 0.35)"
+            ></i>
+          </div>
+          <p
+            class="text-sm leading-relaxed"
+            style="color: rgba(101, 101, 111, 0.55)"
+          >
+            Ketik kata apapun dan lihat<br />seberapa dekat dengan jawaban
+          </p>
+          <div
+            class="flex items-center gap-4 mt-4 text-xs"
+            style="color: rgba(101, 101, 111, 0.4)"
+          >
+            <span class="flex items-center gap-1"
+              ><span
+                class="w-2.5 h-2.5 rounded-sm"
+                style="background: #22c55e"
+              ></span
+              >Dekat</span
+            >
+            <span class="flex items-center gap-1"
+              ><span
+                class="w-2.5 h-2.5 rounded-sm"
+                style="background: #eab308"
+              ></span
+              >Sedang</span
+            >
+            <span class="flex items-center gap-1"
+              ><span
+                class="w-2.5 h-2.5 rounded-sm"
+                style="background: #ef4444"
+              ></span
+              >Jauh</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Menang -->
+    <div id="winModal" class="hidden fixed inset-0 z-40">
+      <div
+        class="modal-bg absolute inset-0 bg-black/70 backdrop-blur-sm"
+        data-close="winModal"
+      ></div>
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          class="modal-box rounded-2xl p-6 w-full max-w-sm text-center relative"
+          style="background: var(--card); border: 1px solid var(--border)"
+        >
+          <div
+            class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+            style="background: rgba(245, 158, 11, 0.12)"
+          >
+            <i
+              class="fa-solid fa-trophy text-2xl"
+              style="color: var(--accent)"
+            ></i>
+          </div>
+          <h2 class="font-display text-2xl font-bold mb-0.5">Ketemu!</h2>
+          <p class="text-sm mb-1" style="color: var(--muted)">
+            Jawabannya adalah
+          </p>
+          <p
+            class="font-display text-3xl font-extrabold mb-4"
+            style="color: var(--accent)"
+            id="winWord"
+          >
+            -
+          </p>
+          <div
+            class="rounded-xl p-3 mb-5"
+            style="background: var(--surface); border: 1px solid var(--border)"
+          >
+            <p class="text-2xl font-display font-bold" id="winNum">0</p>
+            <p class="text-xs" style="color: var(--muted)">tebakan</p>
+          </div>
+          <div class="flex gap-2">
+            <button
+              data-close="winModal"
+              class="flex-1 py-2.5 rounded-xl text-sm transition-all"
+              style="
+                background: var(--surface);
+                border: 1px solid var(--border);
+                color: var(--muted);
+              "
+            >
+              Tutup
+            </button>
+            <button
+              id="winShareBtn"
+              class="flex-1 btn-p py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
+            >
+              <i class="fa-solid fa-share-nodes"></i> Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Bantuan -->
+    <div id="helpModal" class="hidden fixed inset-0 z-40">
+      <div
+        class="modal-bg absolute inset-0 bg-black/70 backdrop-blur-sm"
+        data-close="helpModal"
+      ></div>
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          class="modal-box rounded-2xl p-6 w-full max-w-sm relative max-h-[80vh] overflow-y-auto"
+          style="background: var(--card); border: 1px solid var(--border)"
+        >
+          <button data-close="helpModal" class="close-btn">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <h2 class="font-display text-xl font-bold mb-4">Cara Bermain</h2>
+          <div
+            class="space-y-3.5 text-sm leading-relaxed"
+            style="color: var(--muted)"
+          >
+            <div class="flex gap-3">
+              <span class="step-num">1</span>
+              <p>
+                Ketik
+                <strong style="color: var(--text)">kata apa saja</strong> —
+                Indonesia, Inggris, campuran, semuanya bisa.
+              </p>
+            </div>
+            <div class="flex gap-3">
+              <span class="step-num">2</span>
+              <p>
+                Sistem kasih
+                <strong style="color: var(--text)">ranking</strong>. Makin kecil
+                angkanya, makin dekat dengan jawaban.
+              </p>
+            </div>
+            <div class="flex gap-3">
+              <span class="step-num">3</span>
+              <p>
+                <strong style="color: var(--text)">Ikuti hawa kata</strong> —
+                kalau "Kursi" rankingnya bagus, coba "Meja", "Lemari".
+              </p>
+            </div>
+            <div class="flex gap-3">
+              <span class="step-num">4</span>
+              <p>
+                Ranking <strong style="color: var(--text)">#1</strong> = jawaban
+                yang benar!
+              </p>
+            </div>
+            <div class="mt-4 pt-4" style="border-top: 1px solid var(--border)">
+              <p class="text-xs font-semibold mb-2" style="color: var(--text)">
+                Warna Indikator
+              </p>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-3 h-3 rounded-sm"
+                    style="background: #f59e0b"
+                  ></span
+                  ><span>Emas — Jawaban benar!</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-3 h-3 rounded-sm"
+                    style="background: #22c55e"
+                  ></span
+                  ><span>Hijau — Sangat dekat</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-3 h-3 rounded-sm"
+                    style="background: #eab308"
+                  ></span
+                  ><span>Kuning — Mulai mendekat</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-3 h-3 rounded-sm"
+                    style="background: #f97316"
+                  ></span
+                  ><span>Oranye — Masih jauh</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-3 h-3 rounded-sm"
+                    style="background: #ef4444"
+                  ></span
+                  ><span>Merah — Sangat jauh</span>
+                </div>
+              </div>
+            </div>
+            <p
+              class="text-xs pt-3"
+              style="
+                color: rgba(101, 101, 111, 0.6);
+                border-top: 1px solid var(--border);
+              "
+            >
+              AI menggunakan asosiasi semantik untuk menghitung kedekatan.
+              Setiap kata memiliki ranking.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
