@@ -349,3 +349,159 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ===== Snapshot Card (Image Sharing) ===== */
+.snapshot-card {
+    width: 400px;
+    background: linear-gradient(135deg, #08080A 0%, #111114 100%);
+    color: #EDEDEC;
+    padding: 40px;
+    font-family: 'DM Sans', sans-serif;
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+}
+
+.snapshot-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.1), transparent 70%);
+    z-index: 0;
+}
+
+.snapshot-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.snapshot-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), #D97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #08080A;
+    font-size: 1.2rem;
+}
+
+.snapshot-brand h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.snapshot-brand p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.snapshot-body {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.snapshot-status {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.snapshot-word {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 32px;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+.snapshot-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.snap-stat {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.snap-val {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.snap-lab {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.snapshot-history {
+    font-size: 1.4rem;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    min-height: 24px;
+}
+
+.snapshot-footer {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 20px;
+}
+
+.btn-loading {
+    position: relative !important;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading i {
+    visibility: hidden;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+    z-index: 2;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

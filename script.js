@@ -432,41 +432,96 @@ function hideModal(id) {
 }
 
 // =====================================================
-// SHARE
+// BAGIKAN (IMAGE & TEXT)
 // =====================================================
 
-function shareResult() {
-  const sorted = [...state.guesses].sort((a, b) => a.isNew ? -1 : 1);
-  let text = `I played Contexto Indonesia #${state.puzzleId} and got it in ${state.guesses.length} guesses.\n\n`;
-  for (const g of sorted) {
-    text += getEmoji(g.rank) + ' ' + g.rank + '\n';
-  }
-  text += '\nCoba mainin: contexto.me';
+async function shareResult() {
+  const btnWin = document.getElementById('winShareBtn');
+  const btnHeader = document.getElementById('shareBtn');
+  
+  const isLoading = btnWin.classList.contains('btn-loading');
+  if (isLoading) return;
 
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('Disalin ke clipboard!', 'success');
-    }).catch(() => {
-      fallbackCopy(text);
-    });
-  } else {
-    fallbackCopy(text);
-  }
-}
+  btnWin.classList.add('btn-loading');
+  btnHeader.classList.add('btn-loading');
 
-function fallbackCopy(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;left:-9999px';
-  document.body.appendChild(ta);
-  ta.select();
+  const sorted = [...state.guesses].sort((a, b) => a.rank - b.rank);
+  const topGuesses = sorted.slice(0, 5);
+  
+  let historyEmojis = '';
+  // Batasi emoji agar tidak terlalu panjang di gambar
+  const emojiLimit = 50;
+  state.guesses.slice(-emojiLimit).forEach(g => {
+    historyEmojis += getEmoji(g.rank);
+  });
+
+  // Isi data ke template snapshot
+  document.getElementById('snapshotWord').textContent = state.targetWord;
+  document.getElementById('snapGuesses').textContent = state.guesses.length;
+  document.getElementById('snapScore').textContent = '#1';
+  document.getElementById('snapshotHistory').textContent = historyEmojis;
+
+  // Versi teks untuk clipboard
+  let text = `🎮 WordSense Indonesia #${state.puzzleId}\n`;
+  text += `Berhasil menebak dalam ${state.guesses.length} kali!\n\n`;
+  
+  topGuesses.forEach(g => {
+    if (g.rank === 1) {
+      text += `🏆 #1 ${g.word}\n`;
+    } else {
+      text += `${getEmoji(g.rank)} #${g.rank} ${g.word}\n`;
+    }
+  });
+  
+  text += '\nCoba mainkan: wordsense.yudonoputro.com';
+
   try {
-    document.execCommand('copy');
-    showToast('Disalin ke clipboard!', 'success');
-  } catch {
-    showToast('Gagal menyalin', 'error');
+    const snapshotEl = document.getElementById('shareSnapshot');
+    const canvas = await html2canvas(snapshotEl, {
+      scale: 2,
+      backgroundColor: '#08080A',
+      logging: false,
+      useCORS: true
+    });
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const file = new File([blob], 'wordsense-skor.png', { type: 'image/png' });
+
+    // Coba Web Share API (terutama untuk mobile)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'WordSense Indonesia',
+        text: text
+      });
+      showToast('Berhasil dibagikan!', 'success');
+    } else {
+      // Fallback: Download gambar dan salin teks
+      const link = document.createElement('a');
+      link.download = `wordsense-#${state.puzzleId}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+      
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        showToast('Gambar diunduh & teks disalin!', 'success');
+      } else {
+        showToast('Gambar berhasil diunduh!', 'success');
+      }
+    }
+  } catch (err) {
+    console.error('Gagal berbagi:', err);
+    // Fallback terakhir: hanya teks
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      showToast('Teks disalin ke clipboard!', 'success');
+    } else {
+      showToast('Gagal memproses gambar', 'error');
+    }
+  } finally {
+    btnWin.classList.remove('btn-loading');
+    btnHeader.classList.remove('btn-loading');
   }
-  document.body.removeChild(ta);
 }
 
 // =====================================================
@@ -580,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Tombol new game
   document.getElementById('newGameBtn').addEventListener('click', () => {
     startNewGame();
-    showToast('Puzzle baru dimulai!', 'info');
+    showToast('Permainan baru dimulai!', 'info');
   });
 
   // Tombol share (header)

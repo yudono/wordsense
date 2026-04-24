@@ -6,7 +6,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Contexto Indonesia</title>
+    <title>WordSense Indonesia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
       rel="stylesheet"
@@ -61,7 +62,7 @@
           <h1
             class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight"
           >
-            CONTEXTO
+            WORDSENSE
           </h1>
         </div>
         <p style="color: var(--muted)" class="text-sm mt-0.5">
@@ -133,7 +134,7 @@
               color: var(--muted);
             "
           >
-            <i class="fa-solid fa-share-nodes"></i> Share
+            <i class="fa-solid fa-share-nodes"></i> Bagikan
           </button>
         </div>
       </div>
@@ -247,7 +248,7 @@
               id="winShareBtn"
               class="flex-1 btn-p py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
             >
-              <i class="fa-solid fa-share-nodes"></i> Share
+              <i class="fa-solid fa-share-nodes"></i> Bagikan Gambar
             </button>
           </div>
         </div>
@@ -278,7 +279,7 @@
               <p>
                 Ketik
                 <strong style="color: var(--text)">kata apa saja</strong> —
-                Indonesia, Inggris, campuran, semuanya bisa.
+                semuanya harus dalam Bahasa Indonesia.
               </p>
             </div>
             <div class="flex gap-3">
@@ -356,6 +357,51 @@
               Setiap kata memiliki ranking.
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Snapshot Tersembunyi untuk Berbagi Gambar -->
+    <div
+      id="snapshotContainer"
+      style="position: absolute; left: -9999px; top: -9999px"
+    >
+      <div id="shareSnapshot" class="snapshot-card">
+        <div class="snapshot-header">
+          <div class="snapshot-icon">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div class="snapshot-brand">
+            <h2>WordSense</h2>
+            <p id="snapshotMode">Tantangan Harian</p>
+          </div>
+        </div>
+
+        <div class="snapshot-body">
+          <div class="snapshot-status" id="snapshotStatus">
+            MISI BERHASIL
+          </div>
+          <div class="snapshot-word" id="snapshotWord">KATA</div>
+
+          <div class="snapshot-stats">
+            <div class="snap-stat">
+              <span class="snap-val" id="snapGuesses">0</span>
+              <span class="snap-lab">Tebakan</span>
+            </div>
+            <div class="snap-stat">
+              <span class="snap-val" id="snapScore">#1</span>
+              <span class="snap-lab">Peringkat</span>
+            </div>
+          </div>
+
+          <div class="snapshot-history" id="snapshotHistory">
+            <!-- Emojis representing guess history -->
+          </div>
+        </div>
+
+        <div class="snapshot-footer">
+          <i class="fa-solid fa-lightbulb mr-1 opacity-50"></i>
+          <span>wordsense.yudonoputro.com</span>
         </div>
       </div>
     </div>
