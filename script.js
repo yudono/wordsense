@@ -106,7 +106,8 @@ const state = {
   guesses: [],       // [{word, rank, isNew}]
   guessedSet: new Set(),
   won: false,
-  puzzleId: 1
+  puzzleId: 1,
+  hintsRevealed: 0
 };
 
 // Cache cluster data per puzzle
@@ -125,6 +126,44 @@ function seededRandom(seed) {
     s = (s * 16807 + 0) % 2147483647;
     return (s - 1) / 2147483646;
   };
+}
+
+// Local Storage Persistence
+function saveGameState() {
+  const data = {
+    targetWord: state.targetWord,
+    targetCluster: state.targetCluster,
+    totalRanked: state.totalRanked,
+    guesses: state.guesses,
+    won: state.won,
+    puzzleId: state.puzzleId,
+    hintsRevealed: state.hintsRevealed
+  };
+  localStorage.setItem('wordsense_state', JSON.stringify(data));
+}
+
+function loadGameState() {
+  const saved = localStorage.getItem('wordsense_state');
+  if (!saved) return false;
+
+  try {
+    const data = JSON.parse(saved);
+    state.targetWord = data.targetWord;
+    state.targetCluster = data.targetCluster;
+    state.totalRanked = data.totalRanked;
+    state.guesses = data.guesses || [];
+    state.won = data.won || false;
+    state.puzzleId = data.puzzleId || 1;
+    state.hintsRevealed = data.hintsRevealed || 0;
+    state.guessedSet = new Set(state.guesses.map(g => g.word));
+    
+    // Re-initialize ranking map with saved puzzleId
+    initPuzzle(state.puzzleId);
+    return true;
+  } catch (e) {
+    console.error("Gagal memuat state:", e);
+    return false;
+  }
 }
 
 // Normalisasi kata
@@ -525,6 +564,37 @@ async function shareResult() {
 }
 
 // =====================================================
+// BANTUAN HURUF
+// =====================================================
+
+function giveLetterHint() {
+  if (state.won || !state.targetWord) return;
+  
+  if (state.hintsRevealed < state.targetWord.length) {
+    state.hintsRevealed++;
+  } else {
+    showToast('Seluruh huruf sudah terbuka!', 'info');
+    return;
+  }
+
+  const display = document.getElementById('letterHintDisplay');
+  display.classList.remove('hidden');
+  
+  let hintStr = '';
+  for (let i = 0; i < state.targetWord.length; i++) {
+    if (i < state.hintsRevealed) {
+      hintStr += state.targetWord[i].toUpperCase();
+    } else {
+      hintStr += '_';
+    }
+  }
+  
+  display.textContent = hintStr;
+  saveGameState();
+  showToast(`Huruf ke-${state.hintsRevealed} terbuka!`, 'success');
+}
+
+// =====================================================
 // GAME LOGIC
 // =====================================================
 
@@ -555,6 +625,7 @@ function makeGuess(rawWord) {
 
   state.guesses.push({ word, rank, isNew: true });
 
+  saveGameState();
   renderAllGuesses();
   updateStats();
 
@@ -578,7 +649,7 @@ function makeGuess(rawWord) {
 }
 
 function startNewGame(customId) {
-  const id = customId || (Date.now() % 10000);
+  const id = customId || Math.floor(Math.random() * 1000000);
   const puzzle = initPuzzle(id);
 
   state.targetWord = puzzle.target;
@@ -587,7 +658,8 @@ function startNewGame(customId) {
   state.guesses = [];
   state.guessedSet = new Set();
   state.won = false;
-  state.puzzleId = customId || Math.floor(Math.random() * 999) + 1;
+  state.puzzleId = id;
+  state.hintsRevealed = 0;
 
   // Reset UI
   document.getElementById('guessList').innerHTML = '';
@@ -600,9 +672,13 @@ function startNewGame(customId) {
   document.getElementById('shareBtn').classList.add('hidden');
   document.getElementById('shareBtn').style.display = '';
   document.getElementById('hintWrap').classList.add('hidden');
+  document.getElementById('letterHintDisplay').classList.add('hidden');
+  document.getElementById('letterHintDisplay').textContent = '';
   hideModal('winModal');
 
+  localStorage.removeItem('wordsense_state');
   updateStats();
+  saveGameState();
 
   console.log('%c[DEBUG] Jawaban: ' + puzzle.target + ' (Cluster: ' + puzzle.clusterName + ')', 'color:#F59E0B;font-weight:bold');
 }
@@ -612,8 +688,31 @@ function startNewGame(customId) {
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Mulai game
-  startNewGame();
+  // Coba muat state dari localStorage, jika gagal buat game baru
+  if (!loadGameState()) {
+    startNewGame();
+  } else {
+    // Restore UI
+    renderAllGuesses();
+    updateStats();
+    
+    if (state.hintsRevealed > 0) {
+      const display = document.getElementById('letterHintDisplay');
+      display.classList.remove('hidden');
+      let hintStr = '';
+      for (let i = 0; i < state.targetWord.length; i++) {
+        hintStr += (i < state.hintsRevealed) ? state.targetWord[i].toUpperCase() : '_';
+      }
+      display.textContent = hintStr;
+    }
+
+    if (state.won) {
+      document.getElementById('winWord').textContent = state.targetWord;
+      document.getElementById('winNum').textContent = state.guesses.length;
+      document.getElementById('shareBtn').classList.remove('hidden');
+      document.getElementById('shareBtn').style.display = 'flex';
+    }
+  }
 
   const input = document.getElementById('guessInput');
   const guessBtn = document.getElementById('guessBtn');
@@ -643,6 +742,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Tombol share (modal menang)
   document.getElementById('winShareBtn').addEventListener('click', shareResult);
+
+  // Tombol hint huruf
+  document.getElementById('letterHintBtn').addEventListener('click', giveLetterHint);
 
   // Tutup modal via data-close
   document.querySelectorAll('[data-close]').forEach(el => {

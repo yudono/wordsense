@@ -92,6 +92,11 @@
         </div>
       </header>
 
+      <!-- Bocoran Huruf (Hidden by default) -->
+      <div id="letterHintDisplay" class="hidden mb-4 p-3 rounded-xl text-center font-display font-bold tracking-[0.3em] text-xl" 
+           style="background: rgba(245, 158, 11, 0.05); border: 1px dashed var(--accent); color: var(--accent);">
+      </div>
+
       <!-- Input -->
       <div class="flex gap-2 mb-4">
         <input
@@ -125,6 +130,18 @@
           <span id="hintWrap" class="hidden"
             ><span class="hint-chip" id="hintChip"></span
           ></span>
+          <button
+            id="letterHintBtn"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all"
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid var(--border);
+              color: var(--muted);
+            "
+            title="Bantuan Huruf"
+          >
+            <i class="fa-solid fa-key"></i> Petunjuk
+          </button>
           <button
             id="shareBtn"
             class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
